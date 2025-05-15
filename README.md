@@ -1,7 +1,7 @@
 <img align="right" src="https://avatars.githubusercontent.com/u/9919?s=64&v=4" />
 
 # IAR Build Tools for Arm on GitHub Actions
-
+[![IAR project on GitHub Actions](https://github.com/iarsystems/github-actions-ci-example/actions/workflows/arm.yml/badge.svg)](https://github.com/iarsystems/github-actions-ci-example/actions/workflows/arm.yml)
 
 >[!WARNING]
 >The information in this repository is subject to change without notice and does not constitute a commitment by IAR. While it serves as reference model for implementing Continuous Integration with IAR Tools, IAR assumes no responsibility for any errors, omissions, or specific implementations.
