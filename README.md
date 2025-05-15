@@ -20,11 +20,11 @@ In case you need an introduction on how to get started with GitHub, use [GitHub 
 1. [Fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) or [Import](https://docs.github.com/en/migrations/importing-source-code/using-github-importer/importing-a-repository-with-github-importer) this repository.
 2. Create a [__New repository secret__](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) for GitHub Actions. __Name__ it `IAR_LMS_BEARER_TOKEN`, paste your CI Token under __Secret__ and click __Add secret__
 
-![image](https://github.com/user-attachments/assets/c8de1633-9f6f-4c09-a394-8edc406b06dd)
+![image](https://github.com/user-attachments/assets/250c84f0-803a-4ae5-8355-5b359991ea9a)
 
 3. [Manually run the workflow](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow), or else trigger a new build by commiting and pushing changes to your repository.
 
-![image](https://github.com/user-attachments/assets/f9c762d3-7672-4144-bb87-fe6302dbae3c)
+![image](https://github.com/user-attachments/assets/d7f93618-e993-47ae-91b0-9fe9929f1038)
 
 ## GitHub Actions workflow example
 On your repository, navigate to the [`.github/workflows/arm.yml`](.github/workflows/arm.yml) workflow file. This file uses the [GitHub-flavored YAML syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions) to describe a pipeline containing multiple jobs found in a typical embedded firmware project. This entire pipeline runs in [IAR Cloud-ready Containers](https://github.com/iarsystems/containers).
