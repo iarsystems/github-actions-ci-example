@@ -1,0 +1,168 @@
+name: IAR project on GitHub Actions
+
+# This workflow uses cloud-ready images with
+# the IAR Build Tools for Arm with ST device support
+# from: https://github.com/orgs/iarsystems/packages/arm
+
+on: 
+  # Run the workflow when new code is pushed to the repository
+  push:
+  # Run the workflow manually
+  workflow_dispatch:
+  # Run the workflow on a nightly schedule
+  schedule:
+  - cron: "0 3 * * *"
+
+# Set a new GitHub Actions Secret named IAR_LMS_BEARER_TOKEN
+# for your repository. The secret is then propagated to an
+# Environment variable used for all jobs within this workflow
+env:
+  IAR_LMS_BEARER_TOKEN: ${{ secrets.IAR_LMS_BEARER_TOKEN }}
+
+jobs:
+  build-library:
+    name: Build library
+    runs-on: ubuntu-latest
+    container: ghcr.io/iarsystems/arm:9.60.4-st
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check compiler version
+        run: iccarm --version
+      
+      - name: Build library
+        run: |
+          iarbuild project/EWARM/ChecksumLibrary.ewp -make Debug -log all
+
+      - name: Upload library
+        uses: actions/upload-artifact@v4
+        with:
+          name: library
+          path: project/EWARM/Debug/Exe/ChecksumLibrary.a
+          if-no-files-found: error
+          
+  cstat-library:
+    name: Analyze library
+    runs-on: ubuntu-latest
+    container: ghcr.io/iarsystems/arm:9.60.4-st
+    steps:
+      - uses: actions/checkout@v4
+          
+      - name: C-STAT - Library
+        run: |
+          iarbuild project/EWARM/ChecksumLibrary.ewp -cstat_analyze Debug -log all
+          iarbuild project/EWARM/ChecksumLibrary.ewp -cstat_report Debug -log all
+
+      - name: Upload library report (C-STAT)
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-report.html
+          path: project/EWARM/Debug/C-STAT/*.html
+          if-no-files-found: error
+
+  build-project:
+    name: Build project
+    needs: build-library
+    runs-on: ubuntu-latest
+    container: ghcr.io/iarsystems/arm:9.60.4-st
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download library
+        uses: actions/download-artifact@v4
+        with:
+          name: library
+          path: project/EWARM/Debug/Exe/
+
+      - name: Build project
+        run: |             
+          iarbuild project/EWARM/project.ewp -make Debug -log all
+
+      - name: Upload project
+        uses: actions/upload-artifact@v4
+        with:
+          name: project
+          path: project/EWARM/Debug/Exe/project.out
+          if-no-files-found: error
+
+  cstat-project:
+    name: Static Code Analysis
+    needs: build-project
+    runs-on: ubuntu-latest
+    container: ghcr.io/iarsystems/arm:9.60.4-st
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static Analysis
+        run: |
+          iarbuild project/EWARM/project.ewp -cstat_analyze Debug -log all
+          iarbuild project/EWARM/project.ewp -cstat_report Debug -log all
+
+      - name: Upload project report (C-STAT)
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-cstat.html
+          path: project/EWARM/project/C-STAT/*.html
+          if-no-files-found: error
+
+  crun-project:
+    name: Runtime Analysis
+    needs: build-project
+    runs-on: ubuntu-latest
+    container: ghcr.io/iarsystems/arm:9.60.4-st
+    steps:
+      - name: Download project
+        uses: actions/download-artifact@v4
+        with:
+          name: project
+          path: project/EWARM/Debug/Exe/
+          
+      - name: Runtime Analysis (C-RUN)
+        run: |
+          CSpyBat \
+            /opt/iar/cxarm/arm/bin/libarmPROC.so \
+            /opt/iar/cxarm/arm/bin/libarmSIM2.so \
+            --plugin=/opt/iar/cxarm/arm/bin/libarmLibsupportUniversal.so \
+            --debug_file=project/EWARM/Debug/Exe/project.out \
+            --rtc_enable \
+            --rtc_output=crun-messages.txt \
+            --timeout=2000000 \
+            --backend \
+            --cpu=cortex-m4 \
+            --fpu=vfpv4_sp \
+            --endian=little \
+            --semihosting || true
+
+      - name: Upload project report (C-RUN)
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-crun.txt
+          path: ./crun-messages.txt
+          if-no-files-found: error
+
+# Deploy your firmware
+  deploy:
+    name: Deploy firmware
+    needs: [cstat-project,crun-project]
+    runs-on: ubuntu-latest
+    container: ghcr.io/iarsystems/arm:9.60.4-st
+    steps:
+      - name: Download ELF
+        uses: actions/download-artifact@v4
+        with:
+          name: project
+          path: ./
+
+      - name: Convert to SREC
+        run: |
+          mkdir output
+          $TARGET_DIR/ielftool --srec --verbose project.out output/project.srec
+
+      - name: Convert to HEX
+        run: |
+          $TARGET_DIR/ielftool --ihex --verbose project.out output/project.hex
+
+      - name: Upload firmwares
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmwares-srec-hex
+          path: ./output/*.*
+          if-no-files-found: error            
