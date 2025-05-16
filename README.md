@@ -53,5 +53,5 @@ For questions or suggestions related to this example: try the [wiki][url-repo-wi
 [url-repo]: https://github.com/iarsystems/github-actions-ci-example
 [url-repo-wiki]: https://github.com/iarsystems/github-actions-ci-example/wiki
 [url-repo-issue-new]: https://github.com/iarsystems/github-actions-ci-example/issues/new
-[url-repo-issue-old]: https://github.com/iarsystems/github-actions-ci-example/issues?q=is%3Aissue+is%3Aopen%7Cclosed
+[url-repo-issue-old]: https://github.com/iarsystems/github-actions-ci-example/issues?q=is%3Aissue%20state%3Aopen%20OR%20state%3Aclosed
 
