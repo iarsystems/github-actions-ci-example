@@ -35,7 +35,7 @@ jobs:
           iarbuild project/EWARM/ChecksumLibrary.ewp -make Debug -log all
 
       - name: Upload library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: library
           path: project/EWARM/Debug/Exe/ChecksumLibrary.a
@@ -54,7 +54,7 @@ jobs:
           iarbuild project/EWARM/ChecksumLibrary.ewp -cstat_report Debug -log all
 
       - name: Upload library report (C-STAT)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: library-report.html
           path: project/EWARM/Debug/C-STAT/*.html
@@ -78,7 +78,7 @@ jobs:
           iarbuild project/EWARM/project.ewp -make Debug -log all
 
       - name: Upload project
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: project
           path: project/EWARM/Debug/Exe/project.out
@@ -97,7 +97,7 @@ jobs:
           iarbuild project/EWARM/project.ewp -cstat_report Debug -log all
 
       - name: Upload project report (C-STAT)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: project-cstat.html
           path: project/EWARM/project/C-STAT/*.html
@@ -132,7 +132,7 @@ jobs:
             --semihosting || true
 
       - name: Upload project report (C-RUN)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: project-crun.txt
           path: ./crun-messages.txt
@@ -161,7 +161,7 @@ jobs:
           ielftool --ihex --verbose project.out output/project.hex
 
       - name: Upload firmwares
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: firmwares-srec-hex
           path: ./output/*.*
